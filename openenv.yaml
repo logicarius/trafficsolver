@@ -1,0 +1,93 @@
+name: urbanflow
+version: "1.0.0"
+description: >
+  Urban traffic congestion management environment. An AI agent acts as a
+  traffic engineer, observing network congestion state and taking actions
+  (add capacity, reroute, adjust signals) to minimize delay and improve flow.
+  Models a real-world problem faced by city planners and transportation engineers.
+
+author: "Team Emergers"
+tags: ["openenv", "traffic", "urban", "optimization", "real-world"]
+
+tasks:
+  - id: clear_bottleneck
+    difficulty: easy
+    max_steps: 5
+    description: >
+      Reduce queue at the main bottleneck node by 50% in a weak single-path network.
+    success_threshold: 0.5
+
+  - id: rebalance_network
+    difficulty: medium
+    max_steps: 7
+    description: >
+      Achieve LCI < 0.4 and CDR < 0.7 by redesigning routing in a multi-path network.
+    success_threshold: 0.6
+
+  - id: maintain_stability
+    difficulty: hard
+    max_steps: 10
+    description: >
+      Keep total delay under 600 across 10 steps with constant inflow.
+      Dynamic instability — agent must actively intervene every step.
+    success_threshold: 0.7
+
+observation_space:
+  type: object
+  fields:
+    task_id: string
+    step: integer
+    max_steps: integer
+    nodes:
+      type: array
+      items:
+        node_id: string
+        queue_length: integer
+        is_bottleneck: boolean
+    roads:
+      type: array
+      items:
+        road_id: string
+        from_node: string
+        to_node: string
+        capacity: integer
+        current_load: integer
+        utilization: float
+    lci: float
+    cdr: float
+    total_delay: float
+    average_utilization: float
+    bottleneck_node: string_or_null
+    task_description: string
+    hint: string_or_null
+    done: boolean
+
+action_space:
+  type: object
+  fields:
+    action_type:
+      type: string
+      enum: [add_capacity, add_road, reroute, adjust_signal, do_nothing]
+    road_id: string_or_null
+    capacity_increase: integer_or_null
+    from_node: string_or_null
+    to_node: string_or_null
+    new_capacity: integer_or_null
+    target_node: string_or_null
+    green_time: integer_or_null
+    reasoning: string_or_null
+
+reward_space:
+  type: float
+  range: [0.0, 1.0]
+  description: >
+    Partial reward at every step based on congestion metrics.
+    Penalizes invalid actions. Rewards bottleneck reduction,
+    load balancing, and dynamic stability.
+
+endpoints:
+  reset: POST /reset
+  step: POST /step
+  state: GET /state
+  tasks: GET /tasks
+  health: GET /health
