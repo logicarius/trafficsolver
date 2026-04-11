@@ -6,6 +6,9 @@ Every grader returns a float in [0.0, 1.0].
 from src.network import TrafficNetwork
 from src.routing import compute_lci, compute_cdr, compute_total_delay, find_bottleneck
 
+def _clamp(score: float) -> float:
+    """Clamp score to strictly (0.0, 1.0) — never exactly 0 or 1."""
+    return round(min(max(score, 0.01), 0.99), 3)
 
 # ── Task 1: Clear the Bottleneck ─────────────────────────────────────────────
 
@@ -72,7 +75,7 @@ def grade_task1(
     breakdown["current_queue"] = current_queue
     breakdown["lci"] = lci
 
-    return {"score": round(min(score, 1.0), 3), "breakdown": breakdown}
+    return {"score": _clamp(score), "breakdown": breakdown}
 
 
 # ── Task 2: Rebalance the Network ────────────────────────────────────────────
@@ -134,7 +137,7 @@ def grade_task2(
     breakdown["initial_lci"] = initial_lci
     breakdown["initial_cdr"] = initial_cdr
 
-    return {"score": round(min(score, 1.0), 3), "breakdown": breakdown}
+    return {"score": _clamp(score), "breakdown": breakdown}
 
 
 # ── Task 3: Maintain Dynamic Stability ───────────────────────────────────────
@@ -205,4 +208,4 @@ def grade_task3(
     breakdown["initial_delay"] = initial_delay
     breakdown["delay_history"] = [round(d, 1) for d in delay_history]
 
-    return {"score": round(min(score, 1.0), 3), "breakdown": breakdown}
+    return {"score": _clamp(score), "breakdown": breakdown}
